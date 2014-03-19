@@ -2,11 +2,17 @@ from __future__ import division
 import pygame
 
 class Tile(object):
-    def __init__(self, x, y, draw_size, value=0):
+    def __init__(self, origin, x, y, draw_size, value=0):
         self.x = x
         self.y = y
+        self.origin = origin
         self.draw_size = draw_size
         self.value = value
+        self.rect = (origin[0]+5+self.draw_size*self.x, origin[1]+5+self.draw_size*self.y, self.draw_size-5, self.draw_size-5)
+        
+    def draw(self, screen):
+        pygame.draw.rect(screen,(0,255,0),self.rect)
+        
 
 class Board(object):
     def __init__(self,x,y,draw_size):
@@ -14,7 +20,7 @@ class Board(object):
         self.draw_size = draw_size
         self.x = x
         self.y = y
-        self.tiles = [Tile(x, y, self.draw_size / 4, 0) for y in range(4) for x in range(4)]
+        self.tiles = [Tile((self.x, self.y),x, y, self.draw_size / 4, 0) for y in range(4) for x in range(4)]
         self.rect = (self.x, self.y, self.draw_size, self.draw_size)
         
     def left(self):
@@ -42,6 +48,9 @@ class Board(object):
     def draw(self,screen):
         pygame.draw.rect(screen,(255,0,0),self.rect)
         
+        for tile in self.tiles:
+            tile.draw(screen)
+        
 def read_keyboard():
     x = pygame.key.get_pressed()
     if x[pygame.K_ESCAPE] or x[pygame.K_q] or x[pygame.K_BREAK]:
@@ -54,12 +63,12 @@ def main():
     screen = pygame.display.set_mode((size,size))
     black = 0, 0, 0
     board_size = size//5*4
+    font = pygame.font.SysFont("Courier New", 18)
     
     board = Board(size//5, size//5, board_size)
     done = False
     
     while not done:
-    
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
